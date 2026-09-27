@@ -39,8 +39,8 @@ ABIS=("arm64-v8a" "armeabi-v7a" "x86_64")
 COMPILE_SDK=34
 MIN_SDK=24
 TARGET_SDK=34
-VERSION_CODE=1
-VERSION_NAME="1.0"
+VERSION_CODE="${VERSION_CODE:-1}"
+VERSION_NAME="${VERSION_NAME:-1.0}"
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -318,11 +318,21 @@ mkdir -p "$BUILD/dex"
 
 echo "==> package"
 cp "$BUILD/base.apk" "$BUILD/pulsepoint-unsigned.apk"
-( cd "$BUILD" && zip -q -X "pulsepoint-unsigned.apk" "dex/classes.dex" && zip -q -X -r "pulsepoint-unsigned.apk" "lib" )
+# Native libraries go in uncompressed: the loader maps them straight out of
+# the APK, and on 16 KB-page devices a compressed .so fails to install.
+# (The dex stays deflated; it has no alignment requirement beyond zipalign's.)
+# -D keeps directory entries out: apksigner drops them on signing, and every
+# dropped byte before a .so would shift it off its 16 KB page.
+( cd "$BUILD" && zip -q -X "pulsepoint-unsigned.apk" "dex/classes.dex" \
+  && zip -q -X -0 -r -D "pulsepoint-unsigned.apk" "lib" )
 rm -f "$BUILD/dex/classes.dex"
 
 echo "==> align"
-"$BUILD_TOOLS/zipalign" -f -p 4 "$BUILD/pulsepoint-unsigned.apk" "$BUILD/pulsepoint-aligned.apk"
+# tools/align_apk.py, not zipalign: the SDK's zipalign for this host silently
+# no-ops on -p/-P (entry offsets do not move, yet -c reports OK), so alignment
+# is done and self-checked in Python.  .so files land on 16 KB boundaries,
+# which Android 15+ devices with 16 KB pages require at install time.
+python3 "$ROOT/tools/align_apk.py" "$BUILD/pulsepoint-unsigned.apk" "$BUILD/pulsepoint-aligned.apk"
 
 echo "==> sign"
 KEYSTORE="$BUILD/debug.keystore"
@@ -336,6 +346,7 @@ if [ ! -f "$KEYSTORE" ]; then
   echo "    generated $KEYSTORE"
 fi
 "$BUILD_TOOLS/apksigner" sign \
+  --v1-signing-enabled true --v2-signing-enabled true \
   --ks "$KEYSTORE" --ks-pass pass:pulsepoint --key-pass pass:pulsepoint \
   --out "$BUILD/PulsePoint.apk" "$BUILD/pulsepoint-aligned.apk"
 
