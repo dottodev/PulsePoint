@@ -1,0 +1,80 @@
+// PulsePoint is a native Android app: one Activity, one GLSurfaceView, one .so.
+//
+// The Gradle layer does three things and nothing else -- package the resources,
+// run CMake, and sign the result.  All the build configuration that matters is in
+// app/src/main/cpp/CMakeLists.txt, because the same file is used by the
+// no-Gradle script in tools/build_apk.sh and the two must not drift.
+
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.pulsepoint.app'
+    compileSdk 34
+    ndkVersion '27.1.12297006'
+
+    defaultConfig {
+        applicationId 'com.pulsepoint.app'
+        minSdk 24          // GLES 3.0, and the window-inset APIs the layout needs
+        targetSdk 34
+        versionCode 1
+        versionName '1.0'
+
+        ndk {
+            // arm64 first: that is where essentially all modern Android phones are.
+            // armeabi-v7a covers the long tail, x86_64 covers emulators.
+            abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86_64'
+        }
+
+        externalNativeBuild {
+            cmake {
+                arguments '-DANDROID_STL=c++_static'
+                cppFlags '-std=c++17'
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path 'src/main/cpp/CMakeLists.txt'
+            version '3.22.1'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false      // A single .so with no reflection: nothing to shrink.
+            debuggable false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            debuggable true
+            jniDebuggable true
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    packagingOptions {
+        // The .so is already the smallest it can be; compressing it again just costs
+        // install time and buys nothing.
+        jniLibs {
+            useLegacyPackaging false
+        }
+    }
+
+    androidResources {
+        // No localisation, no density-specific drawables beyond the launcher: every
+        // pixel of the game is drawn by the renderer from a single greyscale atlas.
+        noCompress 'so'
+    }
+
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+}

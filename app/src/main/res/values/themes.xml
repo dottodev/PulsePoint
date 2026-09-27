@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      A black, chrome-free theme.  The window background matches the first frame
+      the renderer draws, so there is no white flash between the launcher and the
+      game, which is the kind of detail that matters more than it sounds when the
+      whole product is about feeling fast.
+    -->
+    <style name="PulsePointTheme" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/pp_black</item>
+        <item name="android:colorBackground">@color/pp_black</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentTransitions">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    </style>
+</resources>

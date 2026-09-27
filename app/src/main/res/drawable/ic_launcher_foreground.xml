@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The wordmark's mark: a target ring with a spike through it, drawn as a vector
+  so it is crisp at every launcher size and costs no rasterised assets.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="3.5"
+        android:pathData="M54,26 a28,28 0 1,0 0.1,0 z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="2.5"
+        android:pathData="M54,39 a15,15 0 1,0 0.1,0 z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M54,47 a7,7 0 1,0 0.1,0 z" />
+    <!-- The pulse spike, crossing the target. -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="4"
+        android:strokeLineCap="square"
+        android:pathData="M22,54 L40,54 L46,36 L56,74 L63,54 L86,54" />
+</vector>

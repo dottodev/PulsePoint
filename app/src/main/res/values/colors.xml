@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The launcher icon is the only place colour appears outside the game.  It is
+  black and white for the same reason the game is: the identity is greyscale.
+-->
+<resources>
+    <color name="pp_black">#FF000000</color>
+    <color name="pp_white">#FFFFFFFF</color>
+    <color name="pp_grey">#FF2A2A2A</color>
+</resources>

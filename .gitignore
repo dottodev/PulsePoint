@@ -1,0 +1,18 @@
+# Build output
+build/
+build-host/
+.externalNativeBuild/
+.cxx/
+.gradle/
+
+# Local SDK / NDK pointers
+local.properties
+
+# Editor and OS noise
+.idea/
+*.iml
+.DS_Store
+captures/
+
+# APK build output (shipped via GitHub Releases, not the tree)
+build-apk/
