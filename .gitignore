@@ -16,3 +16,7 @@ captures/
 
 # APK build output (shipped via GitHub Releases, not the tree)
 build-apk/
+
+# signing keys never enter the tree
+*.keystore
+*.jks

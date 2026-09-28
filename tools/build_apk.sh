@@ -335,7 +335,11 @@ echo "==> align"
 python3 "$ROOT/tools/align_apk.py" "$BUILD/pulsepoint-unsigned.apk" "$BUILD/pulsepoint-aligned.apk"
 
 echo "==> sign"
-KEYSTORE="$BUILD/debug.keystore"
+# The key lives outside "$BUILD" (which is wiped every run): a fresh key per
+# build would make every release uninstallable over the previous one.  Override
+# with KEYSTORE_PATH for a real release key.
+KEYSTORE="${KEYSTORE_PATH:-$HOME/.config/pulsepoint/debug.keystore}"
+mkdir -p "$(dirname "$KEYSTORE")"
 if [ ! -f "$KEYSTORE" ]; then
   keytool -genkeypair -v \
     -keystore "$KEYSTORE" \
@@ -343,10 +347,13 @@ if [ ! -f "$KEYSTORE" ]; then
     -alias pulsepoint \
     -keyalg RSA -keysize 2048 -validity 10000 \
     -dname "CN=PulsePoint Debug, OU=Development, O=PulsePoint, C=ZZ" >/dev/null 2>&1
-  echo "    generated $KEYSTORE"
+  echo "    generated $KEYSTORE (back it up: updates must keep the same key)"
 fi
+# v1 (JAR) signing is off: v2 covers every device back to the minSdkVersion,
+# and a present-but-unverifying v1 block is one more thing a strict installer
+# can choke on.
 "$BUILD_TOOLS/apksigner" sign \
-  --v1-signing-enabled true --v2-signing-enabled true \
+  --v1-signing-enabled false --v2-signing-enabled true \
   --ks "$KEYSTORE" --ks-pass pass:pulsepoint --key-pass pass:pulsepoint \
   --out "$BUILD/PulsePoint.apk" "$BUILD/pulsepoint-aligned.apk"
 
