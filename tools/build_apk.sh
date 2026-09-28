@@ -323,9 +323,14 @@ cp "$BUILD/base.apk" "$BUILD/pulsepoint-unsigned.apk"
 # (The dex stays deflated; it has no alignment requirement beyond zipalign's.)
 # -D keeps directory entries out: apksigner drops them on signing, and every
 # dropped byte before a .so would shift it off its 16 KB page.
-( cd "$BUILD" && zip -q -X "pulsepoint-unsigned.apk" "dex/classes.dex" \
+# classes.dex lives at the archive root: the platform looks up exactly that
+# path (StrictJarFile.findEntry), and anything else -- dex/classes.dex, for
+# example -- installs to "code is missing" with no further explanation.
+mv "$BUILD/dex/classes.dex" "$BUILD/classes.dex"
+rmdir "$BUILD/dex"
+( cd "$BUILD" && zip -q -X "pulsepoint-unsigned.apk" "classes.dex" \
   && zip -q -X -0 -r -D "pulsepoint-unsigned.apk" "lib" )
-rm -f "$BUILD/dex/classes.dex"
+rm -f "$BUILD/classes.dex"
 
 echo "==> align"
 # tools/align_apk.py, not zipalign: the SDK's zipalign for this host silently

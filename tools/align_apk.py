@@ -79,6 +79,13 @@ def check(path):
     """True iff every entry meets its boundary.  Trusts nothing."""
     ok = True
     with zipfile.ZipFile(path, "r") as zin:
+        names = zin.namelist()
+        # The platform looks up exactly "classes.dex" (StrictJarFile); a dex
+        # anywhere else installs to "code is missing".  Nothing on the desktop
+        # side checks this, so the build's own gatekeeper must.
+        if "classes.dex" not in names:
+            print("MISSING classes.dex at archive root")
+            ok = False
         for info in zin.infolist():
             # META-INF is added by apksigner after alignment; signature blobs
             # carry no alignment requirement.
